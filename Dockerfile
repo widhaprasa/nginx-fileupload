@@ -8,7 +8,7 @@ COPY . .
 RUN go build -o app .
 
 # Step 2: Create the image with Nginx and the Go binary
-FROM nginx:1.27.2-bookworm
+FROM fabiocicerchia/nginx-lua:1.27.3-ubuntu
 
 # Copy the compiled Go app from the builder image
 COPY --from=builder /app/app /usr/local/bin/
