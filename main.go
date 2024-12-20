@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
@@ -108,9 +107,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error creating directory", http.StatusInternalServerError)
 		return
 	}
-
-	extension := filepath.Ext(handler.Filename)
-	filename = fmt.Sprintf("%s%s", filename, extension)
 
 	tempFile, err := os.Create(fmt.Sprintf("%s/%s", directory, filename))
 	if err != nil {
