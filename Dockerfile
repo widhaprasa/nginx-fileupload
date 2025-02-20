@@ -1,5 +1,5 @@
 # Step 1: Build the Go app
-FROM golang:1.21.13-bookworm as builder
+FROM golang:1.23.6-alpine3.21 as builder
 
 WORKDIR /app
 COPY . .
@@ -8,7 +8,13 @@ COPY . .
 RUN go build -o app .
 
 # Step 2: Create the image with Nginx and the Go binary
-FROM fabiocicerchia/nginx-lua:1.27.3-ubuntu
+FROM fabiocicerchia/nginx-lua:1.27.3-alpine3.21.2
+
+# Install supervisor to run multiple processes
+RUN apk add --update supervisor && rm  -rf /tmp/* /var/cache/apk/*
+
+# Copy the supervisor configuration
+ADD supervisord.conf /etc/
 
 # Copy the compiled Go app from the builder image
 COPY --from=builder /app/app /usr/local/bin/
@@ -16,8 +22,8 @@ COPY --from=builder /app/app /usr/local/bin/
 # Expose Nginx default port (80)
 EXPOSE 80
 
-# Expose the Go service port (8080)
+# Expose App service port (8080)
 EXPOSE 8080
 
-# Command to run both Go app and Nginx
-CMD ["sh", "-c", "/usr/local/bin/app & nginx -g 'daemon off;'"]
+# Command to run using supervisor
+ENTRYPOINT ["supervisord", "-n", "-c", "/etc/supervisord.conf"]
